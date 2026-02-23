@@ -10,6 +10,9 @@
         "prettier": "prettier ./ --check"
     },
     "dependencies": {
+        "@auth0/nextjs-auth0": "^4.15.0",
+        "@azure/identity": "^4.13.0",
+        "@azure/keyvault-secrets": "^4.10.0",
         "@emotion/cache": "^11.14.0",
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",

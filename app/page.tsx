@@ -1,5 +1,5 @@
 'use client'
-
+import { useUser } from '@auth0/nextjs-auth0'
 import { useEffect, useState } from 'react'
 import {
     Box,
@@ -16,11 +16,21 @@ import {
     Chip,
 } from '@mui/material'
 import { ShopRegistration, ShopRegistrationStatus } from './types/shops'
+import { useRouter } from 'next/navigation'
 
-export default function RegistrationsPage() {
+export default function RegistrationPage() {
     const [registrations, setRegistrations] = useState<ShopRegistration[]>([])
     const [loading, setLoading] = useState(true)
     const [updatingKey, setUpdatingKey] = useState<string | null>(null)
+    const router = useRouter()
+
+    const { isLoading, user } = useUser()
+
+    useEffect(() => {
+        if (!isLoading && !user) {
+            router.push('/auth/login')
+        }
+    }, [isLoading, user])
 
     useEffect(() => {
         fetchRegistrations()
@@ -57,12 +67,17 @@ export default function RegistrationsPage() {
         return <Chip label={status} color={color} size="small" />
     }
 
-    if (loading) {
+    console.log({ isLoading, loading })
+    if (loading || isLoading) {
         return (
             <Box display="flex" justifyContent="center" mt={4}>
                 <CircularProgress />
             </Box>
         )
+    }
+
+    if (!user) {
+        return null
     }
 
     return (
