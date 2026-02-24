@@ -17,10 +17,14 @@ import {
 } from '@mui/material'
 import { ShopRegistration, ShopRegistrationStatus } from './types/shops'
 import { useRouter } from 'next/navigation'
+import ShopStatusConfirmationDialog from './ShopStatusConfirmationDialog'
+import { isEmpty } from 'lodash'
 
 export default function RegistrationPage() {
     const [registrations, setRegistrations] = useState<ShopRegistration[]>([])
     const [loading, setLoading] = useState(true)
+    const [shopToActivate, setShopToActivate] = useState<ShopRegistration | null>(null)
+    const [shopToDeactivate, setShopToDeactivate] = useState<ShopRegistration | null>(null)
     const [updatingKey, setUpdatingKey] = useState<string | null>(null)
     const router = useRouter()
 
@@ -38,7 +42,7 @@ export default function RegistrationPage() {
 
     const fetchRegistrations = async () => {
         try {
-            const res = await fetch('/api/registrations')
+            const res = await fetch('/api/registration')
             const data = await res.json()
             console.log(data)
             setRegistrations(data)
@@ -47,13 +51,6 @@ export default function RegistrationPage() {
         } finally {
             setLoading(false)
         }
-    }
-
-    const updateStatus = async (
-        registrationKey: string,
-        status: ShopRegistrationStatus,
-    ) => {
-        // update status here
     }
 
     const renderStatusChip = (status: ShopRegistrationStatus) => {
@@ -80,8 +77,26 @@ export default function RegistrationPage() {
         return null
     }
 
+    const hasShopToActivate = !isEmpty(shopToActivate)
+    const hasShopToDeactivate = !isEmpty(shopToDeactivate) && !hasShopToActivate // prevent both from being true
     return (
         <Box p={4}>
+            <ShopStatusConfirmationDialog
+                open={hasShopToActivate}
+                action={ShopRegistrationStatus.ACTIVE}
+                shop={shopToActivate}
+                onClose={() => setShopToActivate(null)}
+                onConfirm={() => null}
+                loading={loading}
+            />
+            <ShopStatusConfirmationDialog
+                open={hasShopToDeactivate}
+                action={ShopRegistrationStatus.INACTIVE}
+                shop={shopToDeactivate}
+                onClose={() => setShopToDeactivate(null)}
+                onConfirm={() => null}
+                loading={loading}
+            />
             <Typography variant="h4" gutterBottom>
                 Shop Registrations
             </Typography>
@@ -104,34 +119,20 @@ export default function RegistrationPage() {
                                 <TableCell>{reg.shopName}</TableCell>
                                 <TableCell>{reg.cccLicenseNumber}</TableCell>
                                 <TableCell>
-                                    {reg.streetAddress}, {reg.city}, {reg.state}{' '}
-                                    {reg.zipcode}
+                                    {reg.streetAddress}, {reg.city}, {reg.state} {reg.zipcode}
                                 </TableCell>
-                                <TableCell>
-                                    {renderStatusChip(reg.status)}
-                                </TableCell>
-                                <TableCell>
-                                    {reg.diagnosticsProducts.join(', ')}
-                                </TableCell>
+                                <TableCell>{renderStatusChip(reg.status)}</TableCell>
+                                <TableCell>{reg.diagnosticsProducts.join(', ')}</TableCell>
                                 <TableCell align="right">
-                                    {reg.status ===
-                                        ShopRegistrationStatus.PENDING && (
+                                    {reg.status === ShopRegistrationStatus.PENDING && (
                                         <>
                                             <Button
                                                 variant="contained"
                                                 color="success"
                                                 size="small"
                                                 sx={{ mr: 1 }}
-                                                disabled={
-                                                    updatingKey ===
-                                                    reg.registrationKey
-                                                }
-                                                onClick={() =>
-                                                    updateStatus(
-                                                        reg.registrationKey,
-                                                        ShopRegistrationStatus.ACTIVE,
-                                                    )
-                                                }>
+                                                disabled={updatingKey === reg.registrationKey}
+                                                onClick={() => setShopToActivate(reg)}>
                                                 Approve
                                             </Button>
 
@@ -139,16 +140,8 @@ export default function RegistrationPage() {
                                                 variant="contained"
                                                 color="error"
                                                 size="small"
-                                                disabled={
-                                                    updatingKey ===
-                                                    reg.registrationKey
-                                                }
-                                                onClick={() =>
-                                                    updateStatus(
-                                                        reg.registrationKey,
-                                                        ShopRegistrationStatus.INACTIVE,
-                                                    )
-                                                }>
+                                                disabled={updatingKey === reg.registrationKey}
+                                                onClick={() => setShopToDeactivate(reg)}>
                                                 Reject
                                             </Button>
                                         </>

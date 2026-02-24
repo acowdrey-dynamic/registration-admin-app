@@ -16,7 +16,8 @@ export interface ShopRegistration {
     streetAddress: string
     city: string
     state: string
-    zipcode: number
+    zipcode: string
     shopProviderKey?: string
     diagnosticsProducts: DiagnosticsProduct[]
+    createdAt: string // ISO format
 }

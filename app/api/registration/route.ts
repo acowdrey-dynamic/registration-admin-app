@@ -1,8 +1,4 @@
-import {
-    DiagnosticsProduct,
-    ShopRegistration,
-    ShopRegistrationStatus,
-} from '@/app/types/shops'
+import { DiagnosticsProduct, ShopRegistration, ShopRegistrationStatus } from '@/app/types/shops'
 import axios from 'axios'
 
 export const mockRegistrations: ShopRegistration[] = [
@@ -14,9 +10,10 @@ export const mockRegistrations: ShopRegistration[] = [
         streetAddress: '123 Main St',
         city: 'Kansas City',
         state: 'MO',
-        zipcode: 64108,
+        zipcode: '64108',
         shopProviderKey: 'PROV-001',
         diagnosticsProducts: [DiagnosticsProduct.DIAGNOSTICS_WORKFLOW],
+        createdAt: '2026-02-24T18:45:00Z',
     },
     {
         registrationKey: 'REG-1002',
@@ -26,8 +23,9 @@ export const mockRegistrations: ShopRegistration[] = [
         streetAddress: '456 Oak Ave',
         city: 'Overland Park',
         state: 'KS',
-        zipcode: 66210,
+        zipcode: '66210',
         diagnosticsProducts: [],
+        createdAt: '2025-08-12T03:10:27Z',
     },
     {
         registrationKey: 'REG-1003',
@@ -37,30 +35,25 @@ export const mockRegistrations: ShopRegistration[] = [
         streetAddress: '789 Pine Rd',
         city: 'Olathe',
         state: 'KS',
-        zipcode: 66061,
+        zipcode: '66061',
         shopProviderKey: 'PROV-002',
         diagnosticsProducts: [DiagnosticsProduct.DIAGNOSTICS_WORKFLOW],
+        createdAt: '2024-01-01T00:00:00Z',
     },
 ]
 
 export const GET = async (request: Request) => {
     return Response.json(mockRegistrations)
     try {
-        const response = await axios.get<ShopRegistration[]>(
-            `${process.env.API_BASE_URL}/registrations`,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+        const response = await axios.get<ShopRegistration[]>(`${process.env.API_BASE_URL}/registrations`, {
+            headers: {
+                'Content-Type': 'application/json',
             },
-        )
+        })
 
         return Response.json(response.data)
     } catch (error: any) {
-        console.error(
-            'Error fetching registrations:',
-            error?.response?.data || error.message,
-        )
+        console.error('Error fetching registrations:', error?.response?.data || error.message)
         throw new Error('Failed to fetch registrations')
     }
 }
