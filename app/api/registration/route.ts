@@ -1,51 +1,9 @@
-import { DiagnosticsProduct, ShopRegistration, ShopRegistrationStatus } from '@/app/types/shops'
+import { ShopRegistration } from '@/app/types/shops'
 import axios from 'axios'
 
-export const mockRegistrations: ShopRegistration[] = [
-    {
-        registrationKey: 'REG-1001',
-        cccLicenseNumber: 'CCC-123456',
-        status: ShopRegistrationStatus.ACTIVE,
-        shopName: 'Precision Auto Repair',
-        streetAddress: '123 Main St',
-        city: 'Kansas City',
-        state: 'MO',
-        zipcode: '64108',
-        shopProviderKey: 'PROV-001',
-        diagnosticsProducts: [DiagnosticsProduct.DIAGNOSTICS_WORKFLOW],
-        createdAt: '2026-02-24T18:45:00Z',
-    },
-    {
-        registrationKey: 'REG-1002',
-        cccLicenseNumber: 'CCC-654321',
-        status: ShopRegistrationStatus.PENDING,
-        shopName: 'Elite Collision Center',
-        streetAddress: '456 Oak Ave',
-        city: 'Overland Park',
-        state: 'KS',
-        zipcode: '66210',
-        diagnosticsProducts: [],
-        createdAt: '2025-08-12T03:10:27Z',
-    },
-    {
-        registrationKey: 'REG-1003',
-        cccLicenseNumber: 'CCC-111222',
-        status: ShopRegistrationStatus.INACTIVE,
-        shopName: 'Metro Body Shop',
-        streetAddress: '789 Pine Rd',
-        city: 'Olathe',
-        state: 'KS',
-        zipcode: '66061',
-        shopProviderKey: 'PROV-002',
-        diagnosticsProducts: [DiagnosticsProduct.DIAGNOSTICS_WORKFLOW],
-        createdAt: '2024-01-01T00:00:00Z',
-    },
-]
-
-export const GET = async (request: Request) => {
-    return Response.json(mockRegistrations)
+export const GET = async () => {
     try {
-        const response = await axios.get<ShopRegistration[]>(`${process.env.API_BASE_URL}/registrations`, {
+        const response = await axios.get<ShopRegistration[]>(`https://cccbrokerdev.allcleardandc.com/shop`, {
             headers: {
                 'Content-Type': 'application/json',
             },
