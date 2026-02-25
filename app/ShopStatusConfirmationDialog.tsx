@@ -14,20 +14,20 @@ import { isNil } from 'lodash'
 
 const ShopStatusConfirmationDialog = ({
     open,
-    action,
+    status,
     shop,
     onClose,
     onConfirm,
     loading = false,
 }: {
     open: boolean
-    action: ShopRegistrationStatus.ACTIVE | ShopRegistrationStatus.INACTIVE
+    status: ShopRegistrationStatus.ACTIVE | ShopRegistrationStatus.INACTIVE
     shop: ShopRegistration | null
     onClose: () => void
-    onConfirm: () => void
+    onConfirm: ({ registrationKey, newStatus }: { registrationKey: string; newStatus: ShopRegistrationStatus }) => void
     loading?: boolean
 }) => {
-    const isApprove = action === ShopRegistrationStatus.ACTIVE
+    const isApprove = status === ShopRegistrationStatus.ACTIVE
 
     if (isNil(shop)) {
         return null
@@ -51,7 +51,7 @@ const ShopStatusConfirmationDialog = ({
                 <Button
                     variant="contained"
                     color={isApprove ? 'success' : 'error'}
-                    onClick={onConfirm}
+                    onClick={() => onConfirm({ registrationKey: shop.registrationKey, newStatus: status })}
                     disabled={loading}>
                     {loading ? <CircularProgress size={20} color="inherit" /> : isApprove ? 'Approve' : 'Deny'}
                 </Button>

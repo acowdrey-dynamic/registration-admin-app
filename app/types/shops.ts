@@ -1,7 +1,7 @@
 export enum ShopRegistrationStatus {
-    ACTIVE = 'Active',
-    PENDING = 'Pending',
-    INACTIVE = 'Inactive',
+    ACTIVE = 'ACTIVE',
+    PENDING = 'PENDING',
+    INACTIVE = 'INACTIVE',
 }
 
 export enum DiagnosticsProduct {

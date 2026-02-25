@@ -1,24 +1,15 @@
 'use client'
 import { useUser } from '@auth0/nextjs-auth0'
 import { useEffect, useState } from 'react'
-import {
-    Box,
-    Button,
-    CircularProgress,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography,
-    Chip,
-} from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 import { ShopRegistration, ShopRegistrationStatus } from './types/shops'
 import { useRouter } from 'next/navigation'
 import ShopStatusConfirmationDialog from './ShopStatusConfirmationDialog'
 import { isEmpty } from 'lodash'
+import { loginRoute, logoutRoute } from '@/proxyRoutes'
+import axios from 'axios'
+import ToolBar from './ToolBar'
+import ShopRegistrationTable from './ShopRegistrationTable'
 
 export default function RegistrationPage() {
     const [registrations, setRegistrations] = useState<ShopRegistration[]>([])
@@ -32,9 +23,9 @@ export default function RegistrationPage() {
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push('/auth/login')
+            router.push(loginRoute)
         }
-    }, [isLoading, user])
+    }, [isLoading, user, router])
 
     useEffect(() => {
         fetchRegistrations()
@@ -42,10 +33,8 @@ export default function RegistrationPage() {
 
     const fetchRegistrations = async () => {
         try {
-            const res = await fetch('/api/registration')
-            const data = await res.json()
-            console.log(data)
-            setRegistrations(data)
+            const response = await axios.get<ShopRegistration[]>('/api/registration')
+            setRegistrations(response.data)
         } catch (err) {
             console.error('Failed to fetch registrations', err)
         } finally {
@@ -53,18 +42,6 @@ export default function RegistrationPage() {
         }
     }
 
-    const renderStatusChip = (status: ShopRegistrationStatus) => {
-        const color =
-            status === ShopRegistrationStatus.ACTIVE
-                ? 'success'
-                : status === ShopRegistrationStatus.PENDING
-                  ? 'warning'
-                  : 'default'
-
-        return <Chip label={status} color={color} size="small" />
-    }
-
-    console.log({ isLoading, loading })
     if (loading || isLoading) {
         return (
             <Box display="flex" justifyContent="center" mt={4}>
@@ -79,87 +56,53 @@ export default function RegistrationPage() {
 
     const hasShopToActivate = !isEmpty(shopToActivate)
     const hasShopToDeactivate = !isEmpty(shopToDeactivate) && !hasShopToActivate // prevent both from being true
+
+    const updateStatus = async ({
+        registrationKey,
+        newStatus,
+    }: {
+        registrationKey: string
+        newStatus: ShopRegistrationStatus
+    }) => {
+        setUpdatingKey(registrationKey)
+        try {
+            await axios.post<ShopRegistration[]>(`/api/registration/${registrationKey}/status`, { status: newStatus })
+        } finally {
+            setUpdatingKey(null)
+            setShopToActivate(null)
+            setShopToDeactivate(null)
+            fetchRegistrations()
+        }
+    }
+
     return (
-        <Box p={4}>
-            <ShopStatusConfirmationDialog
-                open={hasShopToActivate}
-                action={ShopRegistrationStatus.ACTIVE}
-                shop={shopToActivate}
-                onClose={() => setShopToActivate(null)}
-                onConfirm={() => null}
-                loading={loading}
-            />
-            <ShopStatusConfirmationDialog
-                open={hasShopToDeactivate}
-                action={ShopRegistrationStatus.INACTIVE}
-                shop={shopToDeactivate}
-                onClose={() => setShopToDeactivate(null)}
-                onConfirm={() => null}
-                loading={loading}
-            />
-            <Typography variant="h4" gutterBottom>
-                Shop Registrations
-            </Typography>
+        <>
+            <ToolBar onLogout={() => router.push(logoutRoute)} />
+            <Box p={4}>
+                <ShopStatusConfirmationDialog
+                    open={hasShopToActivate}
+                    status={ShopRegistrationStatus.ACTIVE}
+                    shop={shopToActivate}
+                    onClose={() => setShopToActivate(null)}
+                    onConfirm={updateStatus}
+                    loading={loading}
+                />
+                <ShopStatusConfirmationDialog
+                    open={hasShopToDeactivate}
+                    status={ShopRegistrationStatus.INACTIVE}
+                    shop={shopToDeactivate}
+                    onClose={() => setShopToDeactivate(null)}
+                    onConfirm={updateStatus}
+                    loading={loading}
+                />
 
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Shop Name</TableCell>
-                            <TableCell>License</TableCell>
-                            <TableCell>Address</TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell>Diagnostics</TableCell>
-                            <TableCell align="right">Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {registrations.map((reg) => (
-                            <TableRow key={reg.registrationKey}>
-                                <TableCell>{reg.shopName}</TableCell>
-                                <TableCell>{reg.cccLicenseNumber}</TableCell>
-                                <TableCell>
-                                    {reg.streetAddress}, {reg.city}, {reg.state} {reg.zipcode}
-                                </TableCell>
-                                <TableCell>{renderStatusChip(reg.status)}</TableCell>
-                                <TableCell>{reg.diagnosticsProducts.join(', ')}</TableCell>
-                                <TableCell align="right">
-                                    {reg.status === ShopRegistrationStatus.PENDING && (
-                                        <>
-                                            <Button
-                                                variant="contained"
-                                                color="success"
-                                                size="small"
-                                                sx={{ mr: 1 }}
-                                                disabled={updatingKey === reg.registrationKey}
-                                                onClick={() => setShopToActivate(reg)}>
-                                                Approve
-                                            </Button>
-
-                                            <Button
-                                                variant="contained"
-                                                color="error"
-                                                size="small"
-                                                disabled={updatingKey === reg.registrationKey}
-                                                onClick={() => setShopToDeactivate(reg)}>
-                                                Reject
-                                            </Button>
-                                        </>
-                                    )}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-
-                        {registrations.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={6} align="center">
-                                    No registrations found
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </Box>
+                <ShopRegistrationTable
+                    shopRegistrations={registrations}
+                    setShopToActivate={setShopToActivate}
+                    setShopToDeactivate={setShopToDeactivate}
+                    updatingKey={updatingKey}
+                />
+            </Box>
+        </>
     )
 }
