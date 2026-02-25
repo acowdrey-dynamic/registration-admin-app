@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export const GET = async () => {
     try {
-        const response = await axios.get<ShopRegistration[]>(`https://cccbrokerdev.allcleardandc.com/shop`, {
+        const response = await axios.get<ShopRegistration[]>(`${process.env.CCC_BROKER_BASE_URL}/shop`, {
             headers: {
                 'Content-Type': 'application/json',
             },

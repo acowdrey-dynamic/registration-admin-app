@@ -42,10 +42,9 @@ const ShopRegistrationTable = ({
                 <TableBody>
                     {shopRegistrations.map((reg) => {
                         const isPending = reg.status === ShopRegistrationStatus.PENDING
-                        const isInactive = reg.status === ShopRegistrationStatus.INACTIVE
                         const isActive = reg.status === ShopRegistrationStatus.ACTIVE
                         const isUpdating = !isEmpty(updatingKey)
-                        const canApprove = isPending || isInactive
+                        const canApprove = isPending
                         const canReject = isPending || isActive
                         return (
                             <TableRow key={reg.registrationKey}>
