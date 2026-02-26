@@ -1,9 +1,7 @@
 import axios from 'axios'
+import { secretClient } from './keyVault'
 
 const clientId = process.env.CCC_BROKER_CLIENT_ID
-const clientSecret = process.env.CCC_BROKER_CLIENT_SECRET
-
-const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
 
 type BrokerToken = {
     token: string
@@ -13,6 +11,9 @@ type BrokerToken = {
 let cachedBrokerToken: BrokerToken | null = null
 
 export const getBrokerAccessToken = async () => {
+    const clientSecret = (await secretClient.getSecret('CCC-BROKER-CLIENT-SECRET')).value
+    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
+
     const now = Math.floor(Date.now() / 1000)
     if (cachedBrokerToken && cachedBrokerToken.expiresAt > now + 10) {
         // 10 sec buffer
