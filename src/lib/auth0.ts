@@ -7,7 +7,10 @@ export const auth0 = (async () => {
     const secret = (await secretClient.getSecret('AUTH0-SECRET')).value
 
     return new Auth0Client({
-        noContentProfileResponseWhenUnauthenticated: true,
+        authorizationParameters: {
+            audience: process.env.AUTH0_AUDIENCE,
+            scope: 'openid profile email read:registrations deny:registrations read:registrations',
+        },
         secret,
         clientSecret,
     })
