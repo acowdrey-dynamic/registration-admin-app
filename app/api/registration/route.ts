@@ -15,7 +15,7 @@ export const GET = async (req: Request) => {
     const startDate = url.searchParams.get('startDate')
     const endDate = url.searchParams.get('endDate')
 
-    params.append('page', (page + 1).toString()) // API is 1-indexed
+    params.append('page', page.toString())
     params.append('size', size.toString())
 
     if (startDate) params.append('startDate', startDate)

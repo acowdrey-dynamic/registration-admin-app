@@ -24,6 +24,7 @@ export default function RegistrationPage() {
     const [loadingData, setLoadingData] = useState(true)
     const [shopToActivate, setShopToActivate] = useState<ShopRegistration | null>(null)
     const [shopToDeactivate, setShopToDeactivate] = useState<ShopRegistration | null>(null)
+    const [shopToDisable, setShopToDisable] = useState<ShopRegistration | null>(null)
     const [updatingKey, setUpdatingKey] = useState<string | null>(null)
     const router = useRouter()
 
@@ -60,7 +61,7 @@ export default function RegistrationPage() {
             })
             setTotalCount(response.data.pagination.totalCount)
             setRegistrations(response.data.data)
-            setPage(response.data.pagination.currentPage - 1) // API is 1-indexed
+            setPage(response.data.pagination.currentPage)
             console.log({ response })
         } catch (err) {
             console.error('Failed to fetch registrations', err)
@@ -82,7 +83,8 @@ export default function RegistrationPage() {
     }
 
     const hasShopToActivate = !isEmpty(shopToActivate)
-    const hasShopToDeactivate = !isEmpty(shopToDeactivate) && !hasShopToActivate // prevent both from being true
+    const hasShopToDeactivate = !isEmpty(shopToDeactivate) && !hasShopToActivate
+    const hasShopToDisable = !isEmpty(shopToDisable) && !hasShopToActivate && !hasShopToDeactivate
 
     const updateStatus = async ({
         registrationKey,
@@ -110,6 +112,9 @@ export default function RegistrationPage() {
             <ToolBar onLogout={() => router.push(logoutRoute)} />
             <Box p={4}>
                 <ShopStatusConfirmationDialog
+                    title="Approve Registration"
+                    text="Are you sure you want to approve this registration?"
+                    actionText="Approve"
                     open={hasShopToActivate}
                     status={ShopRegistrationStatus.ACTIVE}
                     shop={shopToActivate}
@@ -118,10 +123,24 @@ export default function RegistrationPage() {
                     loading={loadingData}
                 />
                 <ShopStatusConfirmationDialog
+                    title="Deny Registration"
+                    text="Are you sure you want to deny this registration?"
+                    actionText="Deny"
                     open={hasShopToDeactivate}
                     status={ShopRegistrationStatus.INACTIVE}
                     shop={shopToDeactivate}
                     onClose={() => setShopToDeactivate(null)}
+                    onConfirm={updateStatus}
+                    loading={loadingData}
+                />
+                <ShopStatusConfirmationDialog
+                    title="Disable Existing Registration"
+                    text="Are you sure you want to disable this registration? This will not update the status in CCC."
+                    actionText="Disable"
+                    open={hasShopToDisable}
+                    status={ShopRegistrationStatus.INACTIVE}
+                    shop={shopToDisable}
+                    onClose={() => setShopToDisable(null)}
                     onConfirm={updateStatus}
                     loading={loadingData}
                 />
@@ -130,6 +149,7 @@ export default function RegistrationPage() {
                     shopRegistrations={registrations}
                     setShopToActivate={setShopToActivate}
                     setShopToDeactivate={setShopToDeactivate}
+                    setShopToDisable={setShopToDisable}
                     updatingKey={updatingKey}
                     filterStatus={filterStatus}
                     setFilterStatus={setFilterStatus}
