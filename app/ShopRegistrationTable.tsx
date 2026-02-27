@@ -35,6 +35,7 @@ const ShopRegistrationTable = ({
     shopRegistrations,
     setShopToActivate,
     setShopToDeactivate,
+    setShopToDisable,
     updatingKey,
     filterStatus,
     setFilterStatus,
@@ -52,6 +53,7 @@ const ShopRegistrationTable = ({
     shopRegistrations: ShopRegistration[]
     setShopToActivate: (shop: ShopRegistration) => void
     setShopToDeactivate: (shop: ShopRegistration) => void
+    setShopToDisable: (shop: ShopRegistration) => void
     updatingKey: string | null
     filterStatus: ShopRegistrationStatus | 'ALL'
     setFilterStatus: (status: ShopRegistrationStatus | 'ALL') => void
@@ -139,7 +141,7 @@ const ShopRegistrationTable = ({
                                 <TableCell sx={{ width: '10%' }}>License</TableCell>
                                 <TableCell sx={{ width: '22%' }}>Address</TableCell>
                                 <TableCell sx={{ width: '10%' }}>Status</TableCell>
-                                <TableCell sx={{ width: '15%' }}>Diagnostics</TableCell>
+                                <TableCell sx={{ width: '15%' }}>CCC Products</TableCell>
                                 <TableCell sx={{ width: '12%' }}>Created Date</TableCell>
                                 <TableCell sx={{ width: 90 }} align="right" />
                                 <TableCell sx={{ width: 90 }} align="left" />
@@ -157,8 +159,6 @@ const ShopRegistrationTable = ({
                                     const isPending = reg.status === ShopRegistrationStatus.PENDING
                                     const isActive = reg.status === ShopRegistrationStatus.ACTIVE
                                     const isUpdating = !isEmpty(updatingKey)
-                                    const canApprove = isPending
-                                    const canReject = isPending || isActive
                                     return (
                                         <TableRow key={reg.registrationKey}>
                                             <TableCell>{reg.shopName}</TableCell>
@@ -170,7 +170,7 @@ const ShopRegistrationTable = ({
                                             <TableCell>{reg.diagnosticsProducts.join(', ')}</TableCell>
                                             <TableCell>{new Date(reg.createdAt).toLocaleDateString()}</TableCell>
                                             <TableCell align="left" padding="checkbox">
-                                                {canApprove && (
+                                                {isPending && (
                                                     <Button
                                                         variant="contained"
                                                         color="success"
@@ -181,9 +181,19 @@ const ShopRegistrationTable = ({
                                                         Approve
                                                     </Button>
                                                 )}
+                                                {isActive && (
+                                                    <Button
+                                                        variant="contained"
+                                                        color="warning"
+                                                        size="small"
+                                                        disabled={isUpdating}
+                                                        onClick={() => setShopToDisable(reg)}>
+                                                        Disable
+                                                    </Button>
+                                                )}
                                             </TableCell>
                                             <TableCell align="left" padding="checkbox">
-                                                {canReject && (
+                                                {isPending && (
                                                     <Button
                                                         variant="contained"
                                                         color="error"

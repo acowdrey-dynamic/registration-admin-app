@@ -16,6 +16,9 @@ const ShopStatusConfirmationDialog = ({
     open,
     status,
     shop,
+    title,
+    text,
+    actionText,
     onClose,
     onConfirm,
     loading = false,
@@ -23,6 +26,9 @@ const ShopStatusConfirmationDialog = ({
     open: boolean
     status: ShopRegistrationStatus.ACTIVE | ShopRegistrationStatus.INACTIVE
     shop: ShopRegistration | null
+    title: string
+    text: string
+    actionText: string
     onClose: () => void
     onConfirm: ({ registrationKey, newStatus }: { registrationKey: string; newStatus: ShopRegistrationStatus }) => void
     loading?: boolean
@@ -34,12 +40,12 @@ const ShopStatusConfirmationDialog = ({
     }
     return (
         <Dialog open={open} onClose={loading ? undefined : onClose}>
-            <DialogTitle>{isApprove ? 'Approve Registration' : 'Deny Registration'}</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
 
             <DialogContent>
-                <DialogContentText>
-                    Are you sure you want to <strong>{isApprove ? 'approve' : 'deny'}</strong> the registration for{' '}
-                    <strong>{shop.shopName}</strong>?
+                <DialogContentText>{text}</DialogContentText>
+                <DialogContentText sx={{ mt: 2 }}>
+                    <strong>{shop.shopName}</strong>
                 </DialogContentText>
             </DialogContent>
 
@@ -53,7 +59,7 @@ const ShopStatusConfirmationDialog = ({
                     color={isApprove ? 'success' : 'error'}
                     onClick={() => onConfirm({ registrationKey: shop.registrationKey, newStatus: status })}
                     disabled={loading}>
-                    {loading ? <CircularProgress size={20} color="inherit" /> : isApprove ? 'Approve' : 'Deny'}
+                    {loading ? <CircularProgress size={20} color="inherit" /> : actionText}
                 </Button>
             </DialogActions>
         </Dialog>
